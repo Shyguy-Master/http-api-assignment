@@ -5,7 +5,121 @@
   <link rel="stylesheet" type="text/css" href="/style.css">
   
   <script>
+    const handleResponse = (response) => {
+      response.text().then((resText) => {
+        const contentType = response.headers.get('Content-Type');
+        
+        const content = document.querySelector('#content');
+        
+        switch (response.status) {
+          case 200:
+            content.innerHTML = `<b>Success</b>`
+            break;
+          case 400:
+            content.innerHTML = `<b>Bad Request</b>`
+            break;
+          case 401:
+            content.innerHTML = `<b>Unauthorized</b>`
+            break;
+          case 403:
+            content.innerHTML = `<b>Forbidden</b>`
+            break;
+          case 500:
+            content.innerHTML = `<b>Internal Server Error</b>`
+            break;
+          case 404:
+            content.innerHTML = `<b>Resource Not Found</b>`
+            break;
+          default:
+            content.innerHTML = `<p>Status Code Not Implemented By Client</p>`
+            break;
+        }
+        
+        if (contentType === 'application/json') {
+          console.log(resText);
+          const parsedResponse = JSON.parse(resText);
+          content.innerHTML += `<p>${parsedResponse.message}</p>`;
+        } else if (contentType === 'text/xml') {
+          console.log(resText);
+          const parsedResponse = new window.DOMParser().parseFromString(resText, 'text/xml');
+          content.innerHTML += `<p>${parsedResponse.querySelector('response').textContent}</p>`;
+        }
+      });
+    };
 
+    const sendFetchRequest = async (url, acceptedType) => {
+      const options = {
+        method: 'GET',
+        headers: {'Accept': acceptedType},
+      };
+
+      let response = await fetch(url, options);
+      handleResponse(response);
+    };
+
+    const init = () => {
+      const sendButton = document.querySelector("#send");
+      const pageSel = document.querySelector("#page");
+      const typeSel = document.querySelector("#type");
+
+      const detResType = () => {
+        switch (pageSel.value) {
+          case "/success":
+            if (typeSel.value === "text/xml") {
+              sendFetchRequest('/success', 'text/xml');
+            } else {
+              sendFetchRequest('/success', 'application/json');
+            }
+            break;
+          case "/badRequest":
+            if (typeSel.value === "text/xml") {
+              sendFetchRequest('/badRequest', 'text/xml');
+            } else {
+              sendFetchRequest('/badRequest', 'application/json');
+            }
+            break;
+          case "/unauthorized":
+            if (typeSel.value === "text/xml") {
+              sendFetchRequest('/unauthorized', 'text/xml');
+            } else {
+              sendFetchRequest('/unauthorized', 'application/json');
+            }
+            break;
+          case "/forbidden":
+            if (typeSel.value === "text/xml") {
+              sendFetchRequest('/forbidden', 'text/xml');
+            } else {
+              sendFetchRequest('/forbidden', 'application/json');
+            }
+            break;
+          case "/internal":
+            if (typeSel.value === "text/xml") {
+              sendFetchRequest('/internal', 'text/xml');
+            } else {
+              sendFetchRequest('/internal', 'application/json');
+            }
+            break;
+          case "/notImplemented":
+            if (typeSel.value === "text/xml") {
+              sendFetchRequest('/notImplemented', 'text/xml');
+            } else {
+              sendFetchRequest('/notImplemented', 'application/json');
+            }
+            break;
+          default:
+            if (typeSel.value === "text/xml") {
+              sendFetchRequest('/notFound', 'text/xml');
+            } else {
+              sendFetchRequest('/notFound', 'application/json');
+            }
+            break;
+        }
+      };
+
+      sendButton.addEventListener('click', detResType);
+    };
+
+    window.onload = init;
   </script>
 </head>
 <body>
